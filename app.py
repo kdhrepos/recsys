@@ -8,7 +8,7 @@ from connector import conn
 from recommender import get_post_recommendations
 
 app = Flask(__name__)
-fast_model = FastText.load("./fasttext_model.model")
+fast_model = FastText.load("./fasttext_reduced_model.model")
 
 
 @app.route('/post-recommendation/<member_id>/<page_num>/<token>/<page_size>')
