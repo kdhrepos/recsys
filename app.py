@@ -1,9 +1,9 @@
 import json
 import time
 from gensim.models import FastText
-from flask import Flask, jsonify, Response
-from post_recommender import post_recommender
+from flask import Flask, jsonify
 from connector import conn
+from post_recommender import get_post_recommendations
 
 app = Flask(__name__)
 fast_model = FastText.load("./fasttext_model.model")
@@ -30,7 +30,7 @@ def post_recommendation(member_id, page_num, token):
     # 이미 반환했던 게시글은 제외
     posts = posts[~posts['id'].isin(returned_posts)]
 
-    recommended_posts = post_recommender.get_post_recommendations(
+    recommended_posts = get_post_recommendations(
         fast_model, post_like, posts, member_info, page_num)
 
     # recommended_posts를 list로 변환
