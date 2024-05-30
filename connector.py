@@ -24,5 +24,10 @@ class Connector:
         post = pd.read_sql(post_sql, conn.mysql)
         return post
 
+    def get_hashtag_post(self, hashtag):
+        hashtag_post_sql = f"SELECT p.* FROM post p JOIN (SELECT * FROM hashtag_post hp WHERE hp.hashtag_id=(SELECT id FROM hashtag h WHERE h.name= \"{hashtag}\")) AS filtered_posts ON p.id = filtered_posts.post_id;"
+        hashtag_post = pd.read_sql(hashtag_post_sql, conn.mysql)
+        return hashtag_post
+
 
 conn = Connector()
