@@ -49,7 +49,7 @@ def get_post_recommendations(model, post_like, post_list, member_info, page_num,
         # 확률이 0인 경우가 0이 아닌 경우보다 많은 경우
         zero_count = np.count_nonzero(probabilities != 0)
         if (zero_count <= page_size):
-            post_len = len(page_size)
+            post_len = page_size
             if (page_size > post_len):
                 return post_ids[:post_len]
             return post_ids[:page_size]
