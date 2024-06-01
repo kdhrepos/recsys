@@ -62,10 +62,9 @@ def post_recommendation(member_id, page_num, page_size):
                     mimetype='application/json')
 
 
-@app.route('/hashtag-recommendation/<hashtag>/<member_id>/<page_num>/<page_size>')
-def hashtag_recommendation(hashtag, member_id, page_num, page_size):
+@app.route('/hashtag-recommendation/<hashtag_id>/<member_id>/<page_num>/<page_size>')
+def hashtag_recommendation(hashtag_id, member_id, page_num, page_size):
     page_size = int(page_size)
-    hashtag_id = conn.get_hashtag_id(hashtag)
     hashtag_post_list = conn.get_hashtag_post(member_id, hashtag_id)
 
     # 이미 반환된 게시글이 있는지 검색
@@ -86,7 +85,7 @@ def hashtag_recommendation(hashtag, member_id, page_num, page_size):
         returned_posts = []
 
     # 반환되었던 게시글 모두 읽어옴
-    returned_posts = conn.redis.hvals(f'h_{hashtag}_{member_id}')
+    returned_posts = conn.redis.hvals(f'h_{hashtag_id}_{member_id}')
     returned_posts = [json.loads(posts.decode()) for posts in returned_posts]
     returned_posts = np.array(returned_posts).flatten().tolist()
 
