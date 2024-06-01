@@ -6,7 +6,6 @@ from gensim.models import FastText
 from flask import Flask, jsonify, Response
 from connector import conn
 from recommender import get_post_recommendations
-from dto import post_response
 
 app = Flask(__name__)
 fast_model = FastText.load("./fasttext_reduced_model.model")
@@ -27,7 +26,7 @@ def post_recommendation(member_id, page_num, page_size):
         returned_posts = json.loads(returned_posts.decode())
         post_list = post_list[post_list['id'].isin(
             returned_posts)]
-        return Response(post_list.to_json(orient='records', date_format='iso', force_ascii=False), content_type='application/json')
+        return Response(post_list.to_json(orient='records', date_format='iso', force_ascii=False), mimetype='application/json')
     # 새로운 페이지 요청이라면, 제외할 페이지 없음
     else:
         returned_posts = []
@@ -43,7 +42,7 @@ def post_recommendation(member_id, page_num, page_size):
     # 현재 존재하는 게시글의 개수가 요청한 페이지 크기보다 작거나 같다면
     # 즉, 마지막 페이지인 경우
     if (len(post_list) <= page_size):
-        return Response(post_list.to_json(orient='records', date_format='iso',))
+        return Response(post_list.to_json(orient='records', date_format='iso',), mimetype='application/json')
 
     post_like = conn.get_post_like(member_id)
     member_info = conn.get_member_info(member_id)
@@ -122,5 +121,5 @@ def job_recommendation(member_id):
 
 
 if __name__ == '__main__':
-    # app.run(host='0.0.0.0')
-    app.run(debug=True)
+    app.run(host='0.0.0.0')
+    # app.run(debug=True)
