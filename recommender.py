@@ -8,8 +8,8 @@ def get_post_recommendations(model, post_like, post_list, member_info, page_num,
         # 좋아요 표시한 게시글이 없을 경우
         if len(post_like) == 0:
             popular_posts = post_list.sort_values(
-                by='like_cnt', ascending=False)
-            return popular_posts['id'].iloc[0:]
+                by='likeCnt', ascending=False)
+            return popular_posts.iloc[0:]
 
             # 자신의 직무 또는 관심 분야를 설정하지 않은 경우
             # if()
@@ -56,12 +56,17 @@ def get_post_recommendations(model, post_like, post_list, member_info, page_num,
         if (zero_count <= page_size):
             post_len = page_size
             if (page_size > post_len):
-                return post_ids[:post_len]
-            return post_ids[:page_size]
+                post_ids = post_ids[:post_len]
+            post_ids = post_ids[:page_size]
+            selected_posts = post_list[post_list['id'].isin(post_ids)]
+
+            return selected_posts
 
         # 확률 값에 비례하여 게시글 추출
         selected_posts = np.random.choice(
             post_ids, size=page_size, replace=False, p=probabilities)
+
+        selected_posts = post_list[post_list['id'].isin(selected_posts)]
 
         return selected_posts
     except Exception as e:
