@@ -6,10 +6,15 @@ from preprocessor import get_vector, cosine_similarity
 def get_post_recommendations(model, post_like, post_list, member_info, page_num, page_size=10):
     try:
         # 좋아요 표시한 게시글이 없을 경우
-        # 자신의 직무 또는 관심 분야를 설정하지 않은 경우
+        if len(post_like) == 0:
+            popular_posts = post_list.sort_values(
+                by='like_cnt', ascending=False)
+            return popular_posts['id'].iloc[0:]
 
-        # Extract vectors from posts and store them in a data of tuples (post_id, vector)
-        # Convert lists of tuples to DataFrames for easier manipulation
+            # 자신의 직무 또는 관심 분야를 설정하지 않은 경우
+            # if()
+
+        # 게시글 좋아요 목록에서 벡터 값 추출
         post_like_vectors = [(post['id'], get_vector(
             model, post['content'])) for _, post in post_like.iterrows()]
         post_list_vectors = [(post['id'], get_vector(
@@ -54,6 +59,7 @@ def get_post_recommendations(model, post_like, post_list, member_info, page_num,
                 return post_ids[:post_len]
             return post_ids[:page_size]
 
+        # 확률 값에 비례하여 게시글 추출
         selected_posts = np.random.choice(
             post_ids, size=page_size, replace=False, p=probabilities)
 

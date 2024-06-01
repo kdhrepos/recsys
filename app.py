@@ -11,17 +11,17 @@ app = Flask(__name__)
 fast_model = FastText.load("./fasttext_reduced_model.model")
 
 
-@app.route('/post-recommendation/<member_id>/<page_num>/<token>/<page_size>')
-def post_recommendation(member_id, page_num, token, page_size):
+@app.route('/post-recommendation/<member_id>/<page_num>/<page_size>')
+def post_recommendation(member_id, page_num, page_size):
     page_size = int(page_size)
 
     # 이미 반환된 게시글이 있는지 검색
-    returned_posts = conn.redis.hget(f'p_{token}', page_num)
+    returned_posts = conn.redis.hget(f'p_{member_id}', page_num)
 
     # 같은 페이지 새로고침 했다면 그냥 그 페이지들 그대로 반환
     # timeout 갱신
     if returned_posts:
-        conn.redis.expire(name=f"p_{token}", time=3600)
+        conn.redis.expire(name=f"p_{member_id}", time=3600)
         returned_posts = json.loads(returned_posts.decode())
         return jsonify(returned_posts)
     # 새로운 페이지 요청이라면, 제외할 페이지 없음
@@ -29,7 +29,7 @@ def post_recommendation(member_id, page_num, token, page_size):
         returned_posts = []
 
     # 반환되었던 게시글 모두 읽어옴
-    returned_posts = conn.redis.hvals(f'p_{token}')
+    returned_posts = conn.redis.hvals(f'p_{member_id}')
     returned_posts = [json.loads(posts.decode()) for posts in returned_posts]
     returned_posts = np.array(returned_posts).flatten().tolist()
 
@@ -53,24 +53,24 @@ def post_recommendation(member_id, page_num, token, page_size):
     recommended_posts = recommended_posts.tolist()
 
     # redis에 반환된 게시글 저장하여 중복 게시글 방지
-    conn.redis.hset(name=f"p_{token}", key=page_num,
+    conn.redis.hset(name=f"p_{member_id}", key=page_num,
                     value=json.dumps(recommended_posts))
 
     # DataFrame을 JSON 형식으로 변환 후 반환
     return jsonify(recommended_posts)
 
 
-@app.route('/hashtag-recommendation/<hashtag>/<member_id>/<page_num>/<token>/<page_size>')
-def hashtag_recommendation(hashtag, member_id, page_num, token, page_size):
+@app.route('/hashtag-recommendation/<hashtag>/<member_id>/<page_num>/<page_size>')
+def hashtag_recommendation(hashtag, member_id, page_num, page_size):
     page_size = int(page_size)
 
     # 이미 반환된 게시글이 있는지 검색
-    returned_posts = conn.redis.hget(f'h_{hashtag}_{token}', page_num)
+    returned_posts = conn.redis.hget(f'h_{hashtag}_{member_id}', page_num)
 
     # 같은 페이지 새로고침 했다면 그냥 그 페이지들 그대로 반환
     # timeout 갱신
     if returned_posts:
-        conn.redis.expire(name=f"h_{hashtag}_{token}", time=3600)
+        conn.redis.expire(name=f"h_{hashtag}_{member_id}", time=3600)
         returned_posts = json.loads(returned_posts.decode())
         return jsonify(returned_posts)
     # 새로운 페이지 요청이라면, 제외할 페이지 없음
@@ -78,7 +78,7 @@ def hashtag_recommendation(hashtag, member_id, page_num, token, page_size):
         returned_posts = []
 
     # 반환되었던 게시글 모두 읽어옴
-    returned_posts = conn.redis.hvals(f'h_{hashtag}_{token}')
+    returned_posts = conn.redis.hvals(f'h_{hashtag}_{member_id}')
     returned_posts = [json.loads(posts.decode()) for posts in returned_posts]
     returned_posts = np.array(returned_posts).flatten().tolist()
 
@@ -100,7 +100,7 @@ def hashtag_recommendation(hashtag, member_id, page_num, token, page_size):
     recommended_posts = recommended_posts.tolist()
 
     # redis에 반환된 게시글 저장하여 중복 게시글 방지
-    conn.redis.hset(name=f"p_{hashtag}_{token}", key=page_num,
+    conn.redis.hset(name=f"p_{hashtag}_{member_id}", key=page_num,
                     value=json.dumps(recommended_posts))
 
     # DataFrame을 JSON 형식으로 변환 후 반환
