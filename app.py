@@ -14,7 +14,16 @@ fast_model = FastText.load("./fasttext_reduced_model.model")
 @app.route('/post-recommendation/<member_id>/<page_num>/<page_size>')
 def post_recommendation(member_id, page_num, page_size):
     page_size = int(page_size)
+    page_num = int(page_num)
     post_list = conn.get_post(member_id)
+    post_list_len = len(post_list)
+    
+    # 페이지 번호가 범위를 넘어선 경우
+    max_page_num = post_list_len // page_size
+    if(post_list_len % page_size != 0):
+        max_page_num += 1
+    if(max_page_num < page_num):
+        return [];
 
     # 이미 반환된 게시글이 있는지 검색
     returned_posts = conn.redis.hget(f'p_{member_id}', page_num)
@@ -65,7 +74,16 @@ def post_recommendation(member_id, page_num, page_size):
 @app.route('/hashtag-recommendation/<hashtag_id>/<member_id>/<page_num>/<page_size>')
 def hashtag_recommendation(hashtag_id, member_id, page_num, page_size):
     page_size = int(page_size)
+    page_num = int(page_num)
     hashtag_post_list = conn.get_hashtag_post(member_id, hashtag_id)
+    hashtag_post_list_len = len(hashtag_post_list)
+    
+     # 페이지 번호가 범위를 넘어선 경우
+    max_page_num = hashtag_post_list_len // page_size
+    if(hashtag_post_list_len % page_size != 0):
+        max_page_num += 1
+    if(max_page_num < page_num):
+        return [];
 
     # 이미 반환된 게시글이 있는지 검색
     returned_posts = conn.redis.hget(f'h_{hashtag_id}_{member_id}', page_num)
@@ -120,5 +138,5 @@ def job_recommendation(member_id):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
-    # app.run(debug=True)
+    # app.run(host='0.0.0.0')
+    app.run(debug=True)
