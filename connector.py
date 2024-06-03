@@ -1,12 +1,13 @@
 import pymysql
 import redis as r
 import pandas as pd
+from sqlalchemy import create_engine
 
 
 class Connector:
     def __init__(self):
-        self.mysql = pymysql.connect(host='165.229.86.160', user='kim', port=8194,
-                                     password='qwe123', db='cns', charset='utf8')
+        self.mysql = create_engine(
+            'mysql+pymysql://kim:qwe123@165.229.86.160:8194/cns')
         self.redis = r.Redis(host='localhost', port=6379, db=0)
 
     def get_member_info(self, member_id):
