@@ -3,34 +3,30 @@ import numpy as np
 from preprocessor import get_vector, cosine_similarity
 
 
-def get_post_recommendations(model, post_like, post_list, member_info, page_num, page_size=10):
+def get_post_recommendations(model, post_like, post_vector_list, member_info, page_num, page_size=10):
     try:
         # 좋아요 표시한 게시글이 없을 경우
-        if len(post_like) == 0:
-            popular_posts = post_list.sort_values(
-                by='likeCnt', ascending=False)
-            return popular_posts.iloc[0:]
+        # if len(post_like) == 0:
+        #     popular_posts = post_vector_list.sort_values(
+        #         by='likeCnt', ascending=False)
+        #     return popular_posts.iloc[0:]
 
-            # 자신의 직무 또는 관심 분야를 설정하지 않은 경우
-            # if()
+        # 자신의 직무 또는 관심 분야를 설정하지 않은 경우
+        # if()
 
         # 게시글 좋아요 목록에서 벡터 값 추출
         post_like_vectors = [(post['id'], get_vector(
             model, post['content'])) for _, post in post_like.iterrows()]
-        post_list_vectors = [(post['id'], get_vector(
-            model, post['content'])) for _, post in post_list.iterrows()]
 
-        post_like_df = pd.DataFrame(
+        post_like_vector_list = pd.DataFrame(
             post_like_vectors, columns=['id', 'vector'])
-        post_list_df = pd.DataFrame(
-            post_list_vectors, columns=['id', 'vector'])
 
         # 코사인 유사도 계산
         similarity_scores = []
-        for _, post_row in post_list_df.iterrows():
-            post_id = post_row['id']
+        for _, post_row in post_vector_list.iterrows():
+            post_id = post_row['post_id']
             post_vector = post_row['vector']
-            for _, like_row in post_like_df.iterrows():
+            for _, like_row in post_like_vector_list.iterrows():
                 like_vector = like_row['vector']
                 similarity = cosine_similarity(like_vector, post_vector)
                 similarity = max(similarity, 0)
@@ -58,7 +54,8 @@ def get_post_recommendations(model, post_like, post_list, member_info, page_num,
             if (page_size > post_len):
                 post_ids = post_ids[:post_len]
             post_ids = post_ids[:page_size]
-            selected_posts = post_list[post_list['id'].isin(post_ids)]
+            selected_posts = post_vector_list[post_vector_list['post_id'].isin(
+                post_ids)]
 
             return selected_posts
 
@@ -66,8 +63,9 @@ def get_post_recommendations(model, post_like, post_list, member_info, page_num,
         selected_posts = np.random.choice(
             post_ids, size=page_size, replace=False, p=probabilities)
 
-        selected_posts = post_list[post_list['id'].isin(selected_posts)]
+        selected_posts = post_vector_list[post_vector_list['post_id'].isin(
+            selected_posts)]
 
-        return selected_posts
+        return selected_posts['post_id']
     except Exception as e:
         print(f"Error : {e}")
