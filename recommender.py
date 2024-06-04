@@ -1,15 +1,14 @@
 import pandas as pd
 import numpy as np
-from preprocessor import get_vector, cosine_similarity
+from preprocessor import cosine_similarity
 
 
 def get_post_recommendations(model, post_like_vector_list, post_vector_list, member_info, page_num, page_size=10):
     try:
         # 좋아요 표시한 게시글이 없을 경우
-        # if len(post_like) == 0:
-        #     popular_posts = post_vector_list.sort_values(
-        #         by='likeCnt', ascending=False)
-        #     return popular_posts.iloc[0:]
+        if len(post_like_vector_list) == 0:
+            popular_post_list = post_vector_list.sample(page_size)
+            return popular_post_list['post_id']
 
         # 자신의 직무 또는 관심 분야를 설정하지 않은 경우
         # if()
