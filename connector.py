@@ -188,5 +188,36 @@ class Connector:
             lambda x: [float(i) for i in x.strip('[]').split(',')])
         return post_vector
 
+    def get_post_like_vector(self, member_id):
+        post_like_vector_sql = f'SELECT v.post_id, v.vector \
+        FROM post_vector v JOIN(SELECT post_id FROM post_like pl \
+        WHERE member_id={member_id} \
+        ORDER BY id DESC LIMIT 5) \
+        AS pl ON v.id = pl.post_id;'
+
+        post_like_vector = pd.read_sql(post_like_vector_sql, self.mysql)
+        post_like_vector['vector'] = post_like_vector['vector'].apply(
+            lambda x: [float(i) for i in x.strip('[]').split(',')])
+        return post_like_vector
+
+    def get_hashtag_post_vector(self, hashtag_id):
+        hashtag_post_vector_sql = f"SELECT \
+        v.post_id, \
+        v.vector \
+        FROM \
+            hashtag_post htp \
+        JOIN  \
+            post p ON htp.post_id = p.id \
+        JOIN \
+            post_vector v ON p.id = v.post_id \
+        WHERE \
+            htp.hashtag_id = {hashtag_id};"
+
+        hashtag_post_vector = pd.read_sql(hashtag_post_vector_sql, self.mysql)
+
+        hashtag_post_vector['vector'] = hashtag_post_vector['vector'].apply(
+            lambda x: [float(i) for i in x.strip('[]').split(',')])
+        return hashtag_post_vector
+
 
 conn = Connector()

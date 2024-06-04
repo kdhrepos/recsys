@@ -3,7 +3,7 @@ import numpy as np
 from preprocessor import get_vector, cosine_similarity
 
 
-def get_post_recommendations(model, post_like, post_vector_list, member_info, page_num, page_size=10):
+def get_post_recommendations(model, post_like_vector_list, post_vector_list, member_info, page_num, page_size=10):
     try:
         # 좋아요 표시한 게시글이 없을 경우
         # if len(post_like) == 0:
@@ -13,13 +13,6 @@ def get_post_recommendations(model, post_like, post_vector_list, member_info, pa
 
         # 자신의 직무 또는 관심 분야를 설정하지 않은 경우
         # if()
-
-        # 게시글 좋아요 목록에서 벡터 값 추출
-        post_like_vectors = [(post['id'], get_vector(
-            model, post['content'])) for _, post in post_like.iterrows()]
-
-        post_like_vector_list = pd.DataFrame(
-            post_like_vectors, columns=['id', 'vector'])
 
         # 코사인 유사도 계산
         similarity_scores = []
@@ -57,7 +50,7 @@ def get_post_recommendations(model, post_like, post_vector_list, member_info, pa
             selected_posts = post_vector_list[post_vector_list['post_id'].isin(
                 post_ids)]
 
-            return selected_posts
+            return selected_posts['post_id']
 
         # 확률 값에 비례하여 게시글 추출
         selected_posts = np.random.choice(
